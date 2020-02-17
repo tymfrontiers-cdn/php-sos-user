@@ -74,7 +74,7 @@ class User{
       $user = $user[0];
       $usr = new \StdClass();
       $user->avatar = $user->avatar;
-      $usr->id = $usr->uniqueid = $user->_id;
+      $usr->id = $usr->uniqueid = $user->id;
       $usr->access_group = "USER";
       $usr->access_rank = (
           \is_array($access_ranks) && \array_key_exists($usr->access_group,$access_ranks)
