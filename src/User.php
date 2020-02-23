@@ -42,7 +42,7 @@ class User{
 
   public function init($user){
     return \is_array($user) ? $this->_createNew($user) : (
-      (new Validator() )->username($user,["user","username",3,12])
+      (new Validator() )->username($user,["user","username",3,12, [], "MIXED"])
       ? $this->_objtize($user) : false
     );
   }
@@ -71,7 +71,7 @@ class User{
     $result_array = self::findBySql($sql);
     $record = !empty($result_array) ? $data->pwdCheck($password,$result_array[0]->password) : false;
     if( $record && ($user = self::find($result_array[0]->_id,"id")) ){
-      $user = $user[0];
+      // $user = $user[0];
       $usr = new \StdClass();
       $user->avatar = $user->avatar;
       $usr->id = $usr->uniqueid = $user->id;
@@ -80,6 +80,7 @@ class User{
           \is_array($access_ranks) && \array_key_exists($usr->access_group,$access_ranks)
         ) ? $access_ranks[$usr->access_group]
           : 0;
+      $usr->alias = $user->alias;
       $usr->name = $user->name;
       $usr->surname = $user->surname;
       $usr->email = $user->email;
@@ -122,7 +123,7 @@ class User{
           $this->$key = $val;
         }
       }
-      $this->_id = \strftime("%y%m%d",\time()) . $data->uniqueRand("", 6, $data::RAND_NUMBERS);
+      $this->_id = $data->uniqueRand("", 12, $data::RAND_MIXED_LOWER, false, MYSQL_BASE_DB, "user", "_id");
       $this->password = $data->pwdHash($this->password);
       // get user connection
       if ( $database->getUser() !== MYSQL_USER_USERNAME ) {
@@ -153,7 +154,7 @@ class User{
   }
   private function _objtize(string $id){
     if ($found = self::find($id)) {
-      foreach ($found[0] as $prop=>$val) {
+      foreach ($found as $prop=>$val) {
         if (!\in_array($prop,["password"])) $this->$prop = $val;
       }
       return true;
