@@ -123,7 +123,7 @@ class User{
           $this->$key = $val;
         }
       }
-      $this->_id = $data->uniqueRand("", 12, $data::RAND_MIXED_LOWER, false, MYSQL_BASE_DB, "user", "_id");
+      $this->_id = $data->uniqueRand("", 12, $data::RAND_MIXED_UPPER, false, MYSQL_BASE_DB, "user", "_id");
       $this->password = $data->pwdHash($this->password);
       // get user connection
       if ( $database->getUser() !== MYSQL_USER_USERNAME ) {
