@@ -2,7 +2,8 @@
 namespace SOS;
 use \TymFrontiers\InstanceError,
     \TymFrontiers\Validator,
-    \TymFrontiers\Data;
+    \TymFrontiers\Data,
+    \Kwiik\Helper as KWK;
 
 class User{
   use \TymFrontiers\Helper\MySQLDatabaseObject,
@@ -42,7 +43,7 @@ class User{
 
   public function init($user){
     return \is_array($user) ? $this->_createNew($user) : (
-      (new Validator() )->username($user,["user","username",3,12, [], "MIXED"])
+      (new Validator() )->username($user,["user","username",5,16, [], "MIXED"])
       ? $this->_objtize($user) : false
     );
   }
@@ -123,7 +124,18 @@ class User{
           $this->$key = $val;
         }
       }
-      $this->_id = $data->uniqueRand("", 12, $data::RAND_MIXED_UPPER, false, MYSQL_BASE_DB, "user", "_id");
+      global $code_prefix;
+      if (!\is_array($code_prefix) || empty($code_prefix["profile"]) ) {
+        $this->errors["_createNew"][] = [
+          @$GLOBALS['access_ranks']['DEVELOPER'],
+          256,
+          "Code prefix variable not set.", __FILE__,
+          __LINE__
+        ];
+        return false;
+      }
+      $prfx = $code_prefix["profile"];
+      $this->_id = KWK\generate_code($prfx, Data::RAND_NUMBERS, 11, "user", "code", MYSQL_BASE_DB, true);
       $this->password = $data->pwdHash($this->password);
       // get user connection
       if ( $database->getUser() !== MYSQL_USER_USERNAME ) {
